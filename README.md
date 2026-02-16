@@ -429,9 +429,6 @@ cd webscraping-manager && bundle exec rubocop
 
 ## Documentação de apoio
 
-- Especificação técnica: `outputs/c2s-webscraping-rails-rails-specification.md`
-- Plano de implementação: `outputs/c2s-webscraping-rails-rails-implementation-steps.md`
-- Enunciado do teste: `tests/Dev Backend Pleno Rails - Teste Técnico.md`
 
 ## 🔗 Referências
 
@@ -439,4 +436,5 @@ cd webscraping-manager && bundle exec rubocop
 * [processing-service](https://github.com/enogrob/processing-service)
 * [notification-service](https://github.com/enogrob/notification-service)
 * [auth-service](https://github.com/enogrob/auth-service)
+* [Dev Backend Pleno Rails - Teste Técnico](refs/Dev%20Backend%20Pleno%20Rails%20-%20Teste%20Técnico.md)
 
