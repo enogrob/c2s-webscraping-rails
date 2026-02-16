@@ -429,6 +429,9 @@ cd webscraping-manager && bundle exec rubocop
 
 ## 🔗 Referências
 
+> 📌 Importante: após clonar o repositório `c2s-webscraping-rails`, os repositórios de serviços devem ser clonados **dentro dele** (como subpastas irmãs), conforme a estrutura deste projeto.
+
+* [c2s-webscraping-rails](https://github.com/enogrob/c2s-webscraping-rails)
 * [webscraping-manager](https://github.com/enogrob/webscraping-manager)
 * [processing-service](https://github.com/enogrob/processing-service)
 * [notification-service](https://github.com/enogrob/notification-service)
