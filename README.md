@@ -388,17 +388,31 @@ Resposta esperada:
 - `🔴 DELETE /tasks/:id`
 - `🔴 DELETE /logout`
 
-<a href="images/screenshot_220.png" target="_blank" rel="noopener noreferrer">
-	<img src="images/screenshot_220.png" alt="login" width="320" />
-</a>
-
-<a href="images/screenshot_221.png" target="_blank" rel="noopener noreferrer">
-	<img src="images/screenshot_221.png" alt="tasks" width="320" />
-</a>
-
-<a href="images/screenshot_222.png" target="_blank" rel="noopener noreferrer">
-	<img src="images/screenshot_222.png" alt="details" width="320" />
-</a>
+<table>
+	<tr>
+		<td align="center">
+			<a href="images/screenshot_220.png" target="_blank" rel="noopener noreferrer">
+				<img src="images/screenshot_220.png" alt="Login" width="260" />
+			</a>
+			<br />
+			<sub>Login</sub>
+		</td>
+		<td align="center">
+			<a href="images/screenshot_221.png" target="_blank" rel="noopener noreferrer">
+				<img src="images/screenshot_221.png" alt="Tarefas" width="260" />
+			</a>
+			<br />
+			<sub>Lista</sub>
+		</td>
+		<td align="center">
+			<a href="images/screenshot_222.png" target="_blank" rel="noopener noreferrer">
+				<img src="images/screenshot_222.png" alt="Detalhe" width="260" />
+			</a>
+			<br />
+			<sub>Detalhe</sub>
+		</td>
+	</tr>
+</table>
 
 ### Páginas de erro (Web UI)
 
