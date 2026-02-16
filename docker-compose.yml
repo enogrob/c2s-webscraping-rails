@@ -9,6 +9,12 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d c2s_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   redis:
     image: redis:7
@@ -16,6 +22,12 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
 
   auth-service:
     build: ./auth-service
@@ -28,7 +40,8 @@ services:
     ports:
       - "3001:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   notification-service:
     build: ./notification-service
@@ -40,7 +53,8 @@ services:
     ports:
       - "3002:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   processing-service:
     build: ./processing-service
@@ -52,7 +66,8 @@ services:
     ports:
       - "3003:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   webscraping-manager:
     build: ./webscraping-manager
@@ -68,10 +83,35 @@ services:
     ports:
       - "3000:80"
     depends_on:
-      - postgres
-      - redis
-      - processing-service
-      - notification-service
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      processing-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+
+  webscraping-manager-sidekiq:
+    build: ./webscraping-manager
+    command: bundle exec sidekiq
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/webscraping_manager_production
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY_BASE: supersecret_webscraping_manager_key
+      JWT_SECRET: supersecret
+      PROCESSING_SERVICE_URL: http://processing-service
+      NOTIFICATION_SERVICE_URL: http://notification-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      processing-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
 
 volumes:
   postgres_data:
