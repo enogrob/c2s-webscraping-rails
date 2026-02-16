@@ -357,39 +357,39 @@ Resposta esperada:
 
 ### auth-service
 
-- `POST /api/v1/auth/register`
-- `POST /api/v1/auth/login`
-- `GET /health`
+- `🟠 POST /api/v1/auth/register`
+- `🟠 POST /api/v1/auth/login`
+- `🟢 GET /health`
 
 ### webscraping-manager (API)
 
-- `POST /api/v1/tasks`
-- `GET /api/v1/tasks`
-- `GET /api/v1/tasks/:id`
-- `DELETE /api/v1/tasks/:id`
-- `GET /health`
+- `🟠 POST /api/v1/tasks`
+- `🟢 GET /api/v1/tasks`
+- `🟢 GET /api/v1/tasks/:id`
+- `🔴 DELETE /api/v1/tasks/:id`
+- `🟢 GET /health`
 
 ### webscraping-manager (Web UI)
 
-- `GET /login`
-- `POST /login`
-- `GET /register`
-- `POST /register`
-- `GET /tasks`
-- `GET /tasks/:id`
-- `DELETE /tasks/:id`
-- `DELETE /logout`
+- `🟢 GET /login`
+- `🟠 POST /login`
+- `🟢 GET /register`
+- `🟠 POST /register`
+- `🟢 GET /tasks`
+- `🟢 GET /tasks/:id`
+- `🔴 DELETE /tasks/:id`
+- `🔴 DELETE /logout`
 
 ### processing-service
 
-- `POST /api/v1/scrape`
-- `GET /health`
+- `🟠 POST /api/v1/scrape`
+- `🟢 GET /health`
 
 ### notification-service
 
-- `POST /api/v1/notifications`
-- `GET /api/v1/notifications`
-- `GET /health`
+- `🟠 POST /api/v1/notifications`
+- `🟢 GET /api/v1/notifications`
+- `🟢 GET /health`
 
 ## 🔄 Fluxo funcional resumido
 
@@ -426,13 +426,6 @@ cd notification-service && bundle exec rubocop
 cd processing-service && bundle exec rubocop
 cd webscraping-manager && bundle exec rubocop
 ```
-
-## 📚 Documentação de apoio
-
-- 📐 Especificação técnica: `outputs/c2s-webscraping-rails-rails-specification.md`
-- 🧭 Plano de implementação: `outputs/c2s-webscraping-rails-rails-implementation-steps.md`
-- 🧪 Enunciado do teste: `tests/Dev Backend Pleno Rails - Teste Técnico.md`
-
 
 ## 🔗 Referências
 
