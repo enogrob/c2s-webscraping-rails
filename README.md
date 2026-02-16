@@ -273,18 +273,18 @@ sequenceDiagram
 - 🔔 `notification-service`: persistência e listagem de eventos (`task_created`, `task_completed`, `task_failed`).
 - 🗄️ Infra compartilhada: `postgres` + `redis`.
 
-## Stack
+## 🧱 Stack
 
-- Ruby on Rails
-- PostgreSQL
-- Redis + Sidekiq
-- JWT
-- Nokogiri
-- HTTParty
-- Docker Compose
-- RSpec + Rubocop
+- 💎 Ruby on Rails
+- 🗄️ PostgreSQL
+- 🧠 Redis + ⚙️ Sidekiq
+- 🔐 JWT
+- 🕸️ Nokogiri
+- 🌐 HTTParty
+- 🐳 Docker Compose
+- 🧪 RSpec + 🧹 Rubocop
 
-## Estrutura do projeto
+## 🗂️ Estrutura do projeto
 
 ```text
 .
@@ -296,21 +296,21 @@ sequenceDiagram
 └── README.md
 ```
 
-## Pré-requisitos
+## ✅ Pré-requisitos
 
-- Docker
-- Docker Compose
+- 🐳 Docker
+- 🧩 Docker Compose
 
-## Variáveis de ambiente
+## ⚙️ Variáveis de ambiente
 
 Cada serviço possui `.env.example` com os valores necessários:
 
-- `auth-service/.env.example`
-- `notification-service/.env.example`
-- `processing-service/.env.example`
-- `webscraping-manager/.env.example`
+- 🔐 `auth-service/.env.example`
+- 🔔 `notification-service/.env.example`
+- 🕷️ `processing-service/.env.example`
+- 🧭 `webscraping-manager/.env.example`
 
-## Como executar (um comando)
+## ▶️ Como executar (um comando)
 
 Na raiz deste repositório (`src/c2s-webscraping-rails`):
 
@@ -320,15 +320,15 @@ docker compose up -d
 
 O compose sobe:
 
-- `webscraping-manager` (host `3000`)
-- `auth-service` (host `3001`)
-- `notification-service` (host `3002`)
-- `processing-service` (host `3003`)
-- `webscraping-manager-sidekiq`
-- `postgres` (host `55432`, container `5432`)
-- `redis` (host `6379`)
+- 🧭 `webscraping-manager` (host `3000`)
+- 🔐 `auth-service` (host `3001`)
+- 🔔 `notification-service` (host `3002`)
+- 🕷️ `processing-service` (host `3003`)
+- ⚙️ `webscraping-manager-sidekiq`
+- 🗄️ `postgres` (host `55432`, container `5432`)
+- 🧠 `redis` (host `6379`)
 
-## Preparar banco
+## 🗄️ Preparar banco
 
 Após subir os containers, executar:
 
@@ -338,7 +338,7 @@ docker compose exec notification-service bundle exec rails db:prepare
 docker compose exec webscraping-manager bundle exec rails db:prepare
 ```
 
-## Health checks
+## 🩺 Health checks
 
 ```bash
 curl http://localhost:3000/health
@@ -353,7 +353,7 @@ Resposta esperada:
 {"status":"ok"}
 ```
 
-## Endpoints principais (MVP)
+## 🔌 Endpoints principais (MVP)
 
 ### auth-service
 
@@ -391,16 +391,16 @@ Resposta esperada:
 - `GET /api/v1/notifications`
 - `GET /health`
 
-## Fluxo funcional resumido
+## 🔄 Fluxo funcional resumido
 
-1. Usuário registra/login no `webscraping-manager` (via `auth-service`).
-2. Usuário cria tarefa de scraping.
-3. `webscraping-manager` cria task `pending` e enfileira job.
-4. `webscraping-manager-sidekiq` chama `processing-service`.
-5. Task vai para `completed` (com `brand/model/price`) ou `failed` (com `error_message`).
-6. Evento é publicado no `notification-service`.
+1. 👤 Usuário registra/login no `webscraping-manager` (via `auth-service`).
+2. 📝 Usuário cria tarefa de scraping.
+3. 🧭 `webscraping-manager` cria task `pending` e enfileira job.
+4. ⚙️ `webscraping-manager-sidekiq` chama `processing-service`.
+5. ✅/❌ Task vai para `completed` (com `brand/model/price`) ou `failed` (com `error_message`).
+6. 🔔 Evento é publicado no `notification-service`.
 
-## Testes
+## 🧪 Testes
 
 Executar por serviço:
 
@@ -418,7 +418,7 @@ cd webscraping-manager
 bundle exec rspec spec/requests/api/v1/task_lifecycle_spec.rb spec/requests/api/v1/tasks_spec.rb spec/workers/task_processing_worker_spec.rb
 ```
 
-## Lint
+## 🧹 Lint
 
 ```bash
 cd auth-service && bundle exec rubocop
@@ -427,7 +427,11 @@ cd processing-service && bundle exec rubocop
 cd webscraping-manager && bundle exec rubocop
 ```
 
-## Documentação de apoio
+## 📚 Documentação de apoio
+
+- 📐 Especificação técnica: `outputs/c2s-webscraping-rails-rails-specification.md`
+- 🧭 Plano de implementação: `outputs/c2s-webscraping-rails-rails-implementation-steps.md`
+- 🧪 Enunciado do teste: `tests/Dev Backend Pleno Rails - Teste Técnico.md`
 
 
 ## 🔗 Referências
