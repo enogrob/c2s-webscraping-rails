@@ -178,8 +178,13 @@ sequenceDiagram
 			W->>N: POST notification (task_completed)
 		else erro/falha
 			P-->>W: {status=failed, error_message}
-			W->>DB: update status=failed + error_message + completed_at
-			W->>N: POST notification (task_failed)
+			alt anti-bot/captcha detectado e ainda há tentativas
+				W->>DB: update status=pending + mensagem de retry
+				W-->>Q: perform_in(backoff, task_id, retry_count+1)
+			else falha final
+				W->>DB: update status=failed + error_message + completed_at
+				W->>N: POST notification (task_failed)
+			end
 		end
 	end
 ```
@@ -215,6 +220,8 @@ sequenceDiagram
 	P->>P: parse Nokogiri
 	alt sucesso
 		P-->>W: 200 {status: completed, brand, model, price, error_message: null}
+	else bloqueio anti-bot/captcha
+		P-->>W: 200 {status: failed, error_message: "bloqueio anti-bot"}
 	else falha
 		P-->>W: 200 {status: failed, error_message}
 	end
@@ -266,7 +273,7 @@ sequenceDiagram
 
 ## 🧩 Serviços
 
-- 🧭 `webscraping-manager`: UI web mínima + API de tarefas (`create`, `index`, `show`, `destroy`).
+- 🧭 `webscraping-manager`: UI web (login/registro + tarefas) + API de tarefas (`create`, `index`, `show`, `destroy`) + ação de reprocessamento.
 - ⚙️ `webscraping-manager-sidekiq`: worker dedicado para processamento assíncrono de tarefas.
 - 🔐 `auth-service`: registro/login e emissão de JWT com expiração.
 - 🕷️ `processing-service`: scraping com Nokogiri/HTTP e retorno padronizado (`completed`/`failed`).
@@ -377,8 +384,17 @@ Resposta esperada:
 - `🟠 POST /register`
 - `🟢 GET /tasks`
 - `🟢 GET /tasks/:id`
+- `🟠 POST /tasks/:id/reprocess`
 - `🔴 DELETE /tasks/:id`
 - `🔴 DELETE /logout`
+
+### Páginas de erro (Web UI)
+
+- `🟢 GET /400.html`
+- `🟢 GET /401.html`
+- `🟢 GET /404.html`
+- `🟢 GET /422.html`
+- `🟢 GET /500.html`
 
 ### processing-service
 
@@ -397,8 +413,9 @@ Resposta esperada:
 2. 📝 Usuário cria tarefa de scraping.
 3. 🧭 `webscraping-manager` cria task `pending` e enfileira job.
 4. ⚙️ `webscraping-manager-sidekiq` chama `processing-service`.
-5. ✅/❌ Task vai para `completed` (com `brand/model/price`) ou `failed` (com `error_message`).
-6. 🔔 Evento é publicado no `notification-service`.
+5. ✅ Task vai para `completed` (com `brand/model/price`) ou `failed` (com `error_message`).
+6. 🧱 Se houver bloqueio anti-bot/captcha, o worker aplica retry com backoff (até 3 tentativas) antes da falha final.
+7. 🔔 Evento `task_failed` só é publicado quando a falha é definitiva.
 
 ## 🧪 Testes
 
