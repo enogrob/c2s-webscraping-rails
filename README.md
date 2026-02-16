@@ -433,7 +433,7 @@ cd webscraping-manager && bundle exec rubocop
 - Plano de implementação: `outputs/c2s-webscraping-rails-rails-implementation-steps.md`
 - Enunciado do teste: `tests/Dev Backend Pleno Rails - Teste Técnico.md`
 
-## 🔗 Referência
+## 🔗 Referências
 
 * [webscraping-manager](https://github.com/enogrob/webscraping-manager)
 * [processing-service](https://github.com/enogrob/processing-service)
