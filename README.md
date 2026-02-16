@@ -2,8 +2,6 @@
 
 Ecossistema de microsserviços em Ruby on Rails para gerenciamento de tarefas de web scraping de anúncios de veículos, com autenticação via JWT, processamento assíncrono com Sidekiq e registro de notificações de ciclo de vida.
 
-Este repositório atende ao escopo do teste técnico em [Dev Backend Pleno Rails - Teste Técnico.md](refs/Dev%20Backend%20Pleno%20Rails%20-%20Teste%20Técnico.md)
-
 ## 🏗️ Arquitetura
 
 ```mermaid
@@ -303,6 +301,22 @@ sequenceDiagram
 └── README.md
 ```
 
+### 📥 Clonar repositórios (principal + serviços)
+
+> 📌 Importante: os repositórios de serviços devem ser clonados **dentro** do repositório `c2s-webscraping-rails` (como subpastas irmãs), conforme a estrutura acima.
+
+```bash
+# 1) Clone do repositório principal
+git clone https://github.com/enogrob/c2s-webscraping-rails.git
+cd c2s-webscraping-rails
+
+# 2) Clone dos serviços (subpastas)
+git clone https://github.com/enogrob/webscraping-manager.git
+git clone https://github.com/enogrob/processing-service.git
+git clone https://github.com/enogrob/notification-service.git
+git clone https://github.com/enogrob/auth-service.git
+```
+
 ## ✅ Pré-requisitos
 
 - 🐳 Docker
@@ -444,6 +458,90 @@ Resposta esperada:
 6. 🧱 Se houver bloqueio anti-bot/captcha, o worker aplica retry com backoff (até 3 tentativas) antes da falha final.
 7. 🔔 Evento `task_failed` só é publicado quando a falha é definitiva.
 
+## 🗺️ Mapas visuais (rápida compreensão)
+
+<details>
+	<summary><strong>🔁 Ciclo de vida da Task (status + retries)</strong></summary>
+
+```mermaid
+%%{init: {
+	'theme':'base',
+	'themeVariables': {
+		'primaryColor':'#E8F4FD',
+		'primaryBorderColor':'#4A90E2',
+		'primaryTextColor':'#2C3E50',
+		'secondaryColor':'#F0F8E8',
+		'tertiaryColor':'#FDF2E8',
+		'quaternaryColor':'#F8E8F8',
+		'lineColor':'#5D6D7E',
+		'fontFamily':'Inter,Segoe UI,Arial'
+	}
+}}%%
+stateDiagram-v2
+	state "🟡 pending" as pending
+	state "🔵 processing" as processing
+	state "✅ completed" as completed
+	state "🔴 failed" as failed
+
+	[*] --> pending: 📨 enfileira job
+	pending --> processing: 🧠 dequeue (Sidekiq)
+
+	processing --> completed: 🕷️ scrape ok
+	completed --> [*]: 🔔 task_completed
+
+	processing --> failed: 🕷️ scrape falha
+	failed --> pending: ⏱️ retry/backoff (até 3)\n🧱 anti-bot/captcha
+	failed --> [*]: 🔔 task_failed (definitivo)
+
+	completed --> pending: 🔁 reprocess (UI/Web)
+	failed --> pending: 🔁 reprocess (UI/Web)
+```
+
+</details>
+
+<details>
+	<summary><strong>🗄️ Modelo de dados (simplificado)</strong></summary>
+
+```mermaid
+%%{init: {
+	'theme':'base',
+	'themeVariables': {
+		'primaryColor':'#E8F4FD',
+		'primaryBorderColor':'#4A90E2',
+		'primaryTextColor':'#2C3E50',
+		'secondaryColor':'#F0F8E8',
+		'tertiaryColor':'#FDF2E8',
+		'quaternaryColor':'#F8E8F8',
+		'lineColor':'#5D6D7E',
+		'fontFamily':'Inter,Segoe UI,Arial'
+	}
+}}%%
+erDiagram
+	direction LR
+	USER ||--o{ TASK : "🧭 cria 📝"
+	TASK ||--o{ NOTIFICATION : "🔔 gera 📣"
+
+	USER {
+		int id PK
+		string email
+	}
+
+	TASK {
+		int id PK
+		string status
+		datetime completed_at
+	}
+
+	NOTIFICATION {
+		int id PK
+		string event_type
+		int task_id FK
+		datetime created_at
+	}
+```
+
+</details>
+
 ## 🧪 Testes
 
 Executar por serviço:
@@ -473,12 +571,9 @@ cd webscraping-manager && bundle exec rubocop && cd ..
 
 ## 🔗 Referências
 
-> 📌 Importante: após clonar o repositório `c2s-webscraping-rails`, os repositórios de serviços devem ser clonados **dentro dele** (como subpastas irmãs), conforme a estrutura deste projeto.
-
 * [c2s-webscraping-rails](https://github.com/enogrob/c2s-webscraping-rails)
 * [webscraping-manager](https://github.com/enogrob/webscraping-manager)
 * [processing-service](https://github.com/enogrob/processing-service)
 * [notification-service](https://github.com/enogrob/notification-service)
 * [auth-service](https://github.com/enogrob/auth-service)
-* [Dev Backend Pleno Rails - Teste Técnico](refs/Dev%20Backend%20Pleno%20Rails%20-%20Teste%20Técnico.md)
 
