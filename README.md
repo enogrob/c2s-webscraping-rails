@@ -388,7 +388,20 @@ Resposta esperada:
 - `🔴 DELETE /tasks/:id`
 - `🔴 DELETE /logout`
 
+<a href="images/screenshot_220.png" target="_blank" rel="noopener noreferrer">
+	<img src="images/screenshot_220.png" alt="login" width="320" />
+</a>
+
+<a href="images/screenshot_221.png" target="_blank" rel="noopener noreferrer">
+	<img src="images/screenshot_221.png" alt="tasks" width="320" />
+</a>
+
+<a href="images/screenshot_222.png" target="_blank" rel="noopener noreferrer">
+	<img src="images/screenshot_222.png" alt="details" width="320" />
+</a>
+
 ### Páginas de erro (Web UI)
+
 
 - `🟢 GET /400.html`
 - `🟢 GET /401.html`
