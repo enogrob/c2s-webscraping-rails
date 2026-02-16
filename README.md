@@ -2,7 +2,7 @@
 
 Ecossistema de microsserviços em Ruby on Rails para gerenciamento de tarefas de web scraping de anúncios de veículos, com autenticação via JWT, processamento assíncrono com Sidekiq e registro de notificações de ciclo de vida.
 
-Este repositório atende ao escopo do teste técnico em `tests/Dev Backend Pleno Rails - Teste Técnico.md`.
+Este repositório atende ao escopo do teste técnico em [Dev Backend Pleno Rails - Teste Técnico.md](refs/Dev%20Backend%20Pleno%20Rails%20-%20Teste%20Técnico.md)
 
 ## 🏗️ Arquitetura
 
@@ -405,10 +405,10 @@ Resposta esperada:
 Executar por serviço:
 
 ```bash
-cd auth-service && bundle exec rspec
-cd notification-service && bundle exec rspec
-cd processing-service && bundle exec rspec
-cd webscraping-manager && bundle exec rspec
+cd auth-service && bundle exec rspec && cd .. 
+cd notification-service && bundle exec rspec && cd ..
+cd processing-service && bundle exec rspec && cd ..
+cd webscraping-manager && bundle exec rspec && cd ..
 ```
 
 Exemplo de foco no fluxo assíncrono do manager:
@@ -421,10 +421,10 @@ bundle exec rspec spec/requests/api/v1/task_lifecycle_spec.rb spec/requests/api/
 ## 🧹 Lint
 
 ```bash
-cd auth-service && bundle exec rubocop
-cd notification-service && bundle exec rubocop
-cd processing-service && bundle exec rubocop
-cd webscraping-manager && bundle exec rubocop
+cd auth-service && bundle exec rubocop && cd ..
+cd notification-service && bundle exec rubocop && cd ..
+cd processing-service && bundle exec rubocop && cd ..
+cd webscraping-manager && bundle exec rubocop && cd ..
 ```
 
 ## 🔗 Referências
