@@ -341,7 +341,7 @@ docker compose exec webscraping-manager bundle exec rails db:prepare
 ## 🩺 Health checks
 
 ```bash
-curl http://localhost:3000/health
+curl http://localhost:3000/health 
 curl http://localhost:3001/health
 curl http://localhost:3002/health
 curl http://localhost:3003/health
