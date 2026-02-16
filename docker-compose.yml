@@ -1,0 +1,78 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: c2s_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  auth-service:
+    build: ./auth-service
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/auth_service_production
+      SECRET_KEY_BASE: supersecret_auth_service_key
+      JWT_SECRET: supersecret
+      PORT: 80
+    ports:
+      - "3001:80"
+    depends_on:
+      - postgres
+
+  notification-service:
+    build: ./notification-service
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/notification_service_production
+      SECRET_KEY_BASE: supersecret_notification_service_key
+      PORT: 80
+    ports:
+      - "3002:80"
+    depends_on:
+      - postgres
+
+  processing-service:
+    build: ./processing-service
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/processing_service_production
+      SECRET_KEY_BASE: supersecret_processing_service_key
+      PORT: 80
+    ports:
+      - "3003:80"
+    depends_on:
+      - postgres
+
+  webscraping-manager:
+    build: ./webscraping-manager
+    environment:
+      RAILS_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/webscraping_manager_production
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY_BASE: supersecret_webscraping_manager_key
+      JWT_SECRET: supersecret
+      PROCESSING_SERVICE_URL: http://processing-service
+      NOTIFICATION_SERVICE_URL: http://notification-service
+      PORT: 80
+    ports:
+      - "3000:80"
+    depends_on:
+      - postgres
+      - redis
+      - processing-service
+      - notification-service
+
+volumes:
+  postgres_data:
+  redis_data:
