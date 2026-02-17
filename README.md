@@ -324,12 +324,33 @@ git clone https://github.com/enogrob/auth-service.git
 
 ## ⚙️ Variáveis de ambiente
 
-Cada serviço possui `.env.example` com os valores necessários:
+Cada serviço possui templates versionados para facilitar o setup:
+
+- `.env.example` (referência/compose)
+- `.env.test.example` (referência para testes locais)
+
+Os arquivos reais `.env` e `.env.test` **não devem ser commitados** (ficam ignorados no git). Para uso local, copie os templates dentro de cada serviço:
+
+```bash
+cp .env.example .env
+cp .env.test.example .env.test
+```
+
+Nota sobre `DATABASE_URL`:
+
+- Rails rodando no host + Postgres via `docker compose` (porta `55432`): use `postgresql://postgres:postgres@localhost:55432/...`
+- Rails rodando dentro do container: use `postgresql://postgres:postgres@postgres:5432/...` (onde `postgres` é o nome do serviço no compose)
+- Postgres rodando localmente (instalado no host, porta padrão `5432`): use `postgresql://localhost/...` ou `postgresql://USER:PASSWORD@localhost:5432/...`
 
 - 🔐 `auth-service/.env.example`
 - 🔔 `notification-service/.env.example`
 - 🕷️ `processing-service/.env.example`
 - 🧭 `webscraping-manager/.env.example`
+
+- 🔐 `auth-service/.env.test.example`
+- 🔔 `notification-service/.env.test.example`
+- 🕷️ `processing-service/.env.test.example`
+- 🧭 `webscraping-manager/.env.test.example`
 
 ## ▶️ Como executar (um comando)
 
