@@ -1,29 +1,18 @@
 # c2s-webscraping-rails
 
-Ecossistema de microsserviços em Ruby on Rails para gerenciamento de tarefas de web scraping de anúncios de veículos, com autenticação via JWT, processamento assíncrono com Sidekiq e registro de notificações de ciclo de vida.
+Ruby on Rails microservices ecosystem for managing vehicle-ad listing web scraping tasks, with JWT authentication, asynchronous processing through Sidekiq, and lifecycle notification tracking.
+
+![](images/c2s-webscraping-rails-infographic.webp)
 
 ## 🏗️ Arquitetura
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
-graph TB
-	subgraph ClientSide["Consumo"]
-		CLI["🖥️ Navegador (UI Web)"]
+flowchart TD
+	subgraph ClientSide["👤 Client"]
+		CLI(["🖥️ Browser (Web UI)"])
 	end
 
-	subgraph CoreServices["Microsserviços Rails"]
+	subgraph CoreServices["⚙️ Rails Microservices"]
 		AUTH["🔐 auth-service"]
 		MANAGER["🧭 webscraping-manager"]
 		PROC["🕷️ processing-service"]
@@ -31,54 +20,44 @@ graph TB
 		SIDEKIQ["⚙️ webscraping-manager-sidekiq"]
 	end
 
-	subgraph Infra["Infraestrutura"]
+	subgraph Infra["🗄️ Infrastructure"]
 		PG[("🗄️ PostgreSQL")]
 		REDIS[("🧠 Redis")]
+	end
+
+	subgraph External["🌐 External Website"]
 		WEB["🌐 Webmotors"]
 	end
 
-	CLI -->|"telas web + ações"| MANAGER
-	MANAGER -->|"registro/login"| AUTH
+	CLI -->|"web pages + actions"| MANAGER
+	MANAGER -->|"registration/login"| AUTH
 	MANAGER -->|"CRUD task"| PG
-	MANAGER -->|"enfileira job"| REDIS
-	REDIS -->|"consome fila"| SIDEKIQ
+	MANAGER -->|"enqueue job"| REDIS
+	REDIS -->|"consume queue"| SIDEKIQ
 	SIDEKIQ -->|"scrape task"| PROC
-	PROC -->|"raspa anúncio"| WEB
-	PROC -->|"retorna brand/model/price"| SIDEKIQ
-	SIDEKIQ -->|"atualiza task"| MANAGER
-	SIDEKIQ -->|"publica evento"| NOTIF
+	PROC -->|"scrape listing"| WEB
+	PROC -->|"return brand/model/price"| SIDEKIQ
+	SIDEKIQ -->|"update task"| MANAGER
+	SIDEKIQ -->|"publish event"| NOTIF
 	AUTH -->|"users"| PG
 	NOTIF -->|"notifications"| PG
 ```
 
-## 🔁 Diagramas de Sequência
+## 🔁 Sequence Diagrams
 
 <details>
-	<summary><strong>auth-service (registro e login)</strong></summary>
+	<summary><strong>auth-service (registration and login)</strong></summary>
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
 sequenceDiagram
 	autonumber
-	participant C as 👤 Cliente
+	participant C as 👤 Client
 	participant A as 🔐 auth-service
 	participant DB as 🗄️ PostgreSQL
 
 	C->>A: POST /api/v1/auth/register
 	A->>DB: INSERT user
-	DB-->>A: user criado
+	DB-->>A: user created
 	A-->>C: 201 user + token + exp
 
 	C->>A: POST /api/v1/auth/login
@@ -93,25 +72,12 @@ sequenceDiagram
 </details>
 
 <details>
-	<summary><strong>webscraping-manager (API de tasks)</strong></summary>
+	<summary><strong>webscraping-manager (task API)</strong></summary>
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
 sequenceDiagram
 	autonumber
-	participant C as 👤 Cliente
+	participant C as 👤 Client
 	participant M as 🧭 webscraping-manager
 	participant DB as 🗄️ PostgreSQL
 	participant N as 🔔 notification-service
@@ -139,22 +105,9 @@ sequenceDiagram
 </details>
 
 <details>
-	<summary><strong>webscraping-manager-sidekiq (worker assíncrono)</strong></summary>
+	<summary><strong>webscraping-manager-sidekiq (asynchronous worker)</strong></summary>
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
 sequenceDiagram
 	autonumber
 	participant Q as 🧠 Sidekiq Queue
@@ -165,21 +118,21 @@ sequenceDiagram
 
 	Q->>W: perform(task_id)
 	W->>DB: find task
-	alt task inexistente ou terminal
+	alt task does not exist or is terminal
 		W-->>Q: return
-	else task pendente
+	else task is pending
 		W->>DB: update status=processing
 		W->>P: POST /api/v1/scrape (task_id, ad_url)
 		alt status == completed
 			P-->>W: {status, brand, model, price}
-			W->>DB: update status=completed + dados + completed_at
+			W->>DB: update status=completed + data + completed_at
 			W->>N: POST notification (task_completed)
-		else erro/falha
+		else error/failure
 			P-->>W: {status=failed, error_message}
-			alt anti-bot/captcha detectado e ainda há tentativas
-				W->>DB: update status=pending + mensagem de retry
+			alt anti-bot/captcha detected and retries remain
+				W->>DB: update status=pending + retry message
 				W-->>Q: perform_in(backoff, task_id, retry_count+1)
-			else falha final
+			else final failure
 				W->>DB: update status=failed + error_message + completed_at
 				W->>N: POST notification (task_failed)
 			end
@@ -193,34 +146,21 @@ sequenceDiagram
 	<summary><strong>processing-service (scrape)</strong></summary>
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
 sequenceDiagram
 	autonumber
 	participant W as ⚙️ Worker (manager)
 	participant P as 🕷️ processing-service
-	participant S as 🌐 Site alvo (Webmotors)
+	participant S as 🌐 Target Website (Webmotors)
 
 	W->>P: POST /api/v1/scrape (task_id, ad_url)
 	P->>S: GET ad_url
 	S-->>P: HTML
 	P->>P: parse Nokogiri
-	alt sucesso
+	alt success
 		P-->>W: 200 {status: completed, brand, model, price, error_message: null}
-	else bloqueio anti-bot/captcha
-		P-->>W: 200 {status: failed, error_message: "bloqueio anti-bot"}
-	else falha
+	else anti-bot/captcha block
+		P-->>W: 200 {status: failed, error_message: "anti-bot block"}
+	else failure
 		P-->>W: 200 {status: failed, error_message}
 	end
 
@@ -231,28 +171,15 @@ sequenceDiagram
 </details>
 
 <details>
-	<summary><strong>notification-service (eventos)</strong></summary>
+	<summary><strong>notification-service (events)</strong></summary>
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
 sequenceDiagram
 	autonumber
 	participant M as 🧭 webscraping-manager/worker
 	participant N as 🔔 notification-service
 	participant DB as 🗄️ PostgreSQL
-	participant C as 👤 Cliente
+	participant C as 👤 Client
 
 	M->>N: POST /api/v1/notifications
 	N->>DB: INSERT notification
@@ -269,16 +196,16 @@ sequenceDiagram
 
 </details>
 
-## 🧩 Serviços
+## 🧩 Services
 
-- 🧭 `webscraping-manager`: UI web (login/registro + tarefas) + API de tarefas (`create`, `index`, `show`, `destroy`) + ação de reprocessamento.
-- ⚙️ `webscraping-manager-sidekiq`: worker dedicado para processamento assíncrono de tarefas.
-- 🔐 `auth-service`: registro/login e emissão de JWT com expiração.
-- 🕷️ `processing-service`: scraping com Nokogiri/HTTP e retorno padronizado (`completed`/`failed`).
-- 🔔 `notification-service`: persistência e listagem de eventos (`task_created`, `task_completed`, `task_failed`).
-- 🗄️ Infra compartilhada: `postgres` + `redis`.
+- 🧭 `webscraping-manager`: Web UI (login/registration + tasks) + task API (`create`, `index`, `show`, `destroy`) + reprocessing action.
+- ⚙️ `webscraping-manager-sidekiq`: dedicated worker for asynchronous task processing.
+- 🔐 `auth-service`: registration/login and JWT issuance with expiration.
+- 🕷️ `processing-service`: scraping with Nokogiri/HTTP and a standardized response (`completed`/`failed`).
+- 🔔 `notification-service`: event persistence and listing (`task_created`, `task_completed`, `task_failed`).
+- 🗄️ Shared infrastructure: `postgres` + `redis`.
 
-## 🧱 Stack
+## 🧱 Tech Stack
 
 - 💎 Ruby on Rails
 - 🗄️ PostgreSQL
@@ -289,7 +216,7 @@ sequenceDiagram
 - 🐳 Docker Compose
 - 🧪 RSpec + 🧹 Rubocop
 
-## 🗂️ Estrutura do projeto
+## 🗂️ Project Structure
 
 ```text
 .
@@ -301,46 +228,46 @@ sequenceDiagram
 └── README.md
 ```
 
-### 📥 Clonar repositórios (principal + serviços)
+### 📥 Clone Repositories (Main Project + Services)
 
-> 📌 Importante: os repositórios de serviços devem ser clonados **dentro** do repositório `c2s-webscraping-rails` (como subpastas irmãs), conforme a estrutura acima.
+> 📌 Important: service repositories must be cloned **inside** the `c2s-webscraping-rails` repository (as sibling subdirectories), as shown above.
 
 ```bash
-# 1) Clone do repositório principal
+# 1) Clone the main repository
 git clone https://github.com/enogrob/c2s-webscraping-rails.git
 cd c2s-webscraping-rails
 
-# 2) Clone dos serviços (subpastas)
+# 2) Clone the services (subdirectories)
 git clone https://github.com/enogrob/webscraping-manager.git
 git clone https://github.com/enogrob/processing-service.git
 git clone https://github.com/enogrob/notification-service.git
 git clone https://github.com/enogrob/auth-service.git
 ```
 
-## ✅ Pré-requisitos
+## ✅ Prerequisites
 
 - 🐳 Docker
 - 🧩 Docker Compose
 
-## ⚙️ Variáveis de ambiente
+## ⚙️ Environment Variables
 
-Cada serviço possui templates versionados para facilitar o setup:
+Each service includes version-controlled templates to simplify setup:
 
-- `.env.example` (referência/compose)
-- `.env.test.example` (referência para testes locais)
+- `.env.example` (reference/compose)
+- `.env.test.example` (reference for local tests)
 
-Os arquivos reais `.env` e `.env.test` **não devem ser commitados** (ficam ignorados no git). Para uso local, copie os templates dentro de cada serviço:
+The actual `.env` and `.env.test` files **must not be committed** (they are ignored by Git). For local use, copy the templates into each service:
 
 ```bash
 cp .env.example .env
 cp .env.test.example .env.test
 ```
 
-Nota sobre `DATABASE_URL`:
+`DATABASE_URL` notes:
 
-- Rails rodando no host + Postgres via `docker compose` (porta `55432`): use `postgresql://postgres:postgres@localhost:55432/...`
-- Rails rodando dentro do container: use `postgresql://postgres:postgres@postgres:5432/...` (onde `postgres` é o nome do serviço no compose)
-- Postgres rodando localmente (instalado no host, porta padrão `5432`): use `postgresql://localhost/...` ou `postgresql://USER:PASSWORD@localhost:5432/...`
+- Rails running on the host + Postgres via `docker compose` (port `55432`): use `postgresql://postgres:postgres@localhost:55432/...`
+- Rails running inside a container: use `postgresql://postgres:postgres@postgres:5432/...` (where `postgres` is the service name in Compose)
+- Postgres running locally (installed on the host, default port `5432`): use `postgresql://localhost/...` or `postgresql://USER:PASSWORD@localhost:5432/...`
 
 - 🔐 `auth-service/.env.example`
 - 🔔 `notification-service/.env.example`
@@ -352,15 +279,15 @@ Nota sobre `DATABASE_URL`:
 - 🕷️ `processing-service/.env.test.example`
 - 🧭 `webscraping-manager/.env.test.example`
 
-## ▶️ Como executar (um comando)
+## ▶️ How to Run (One Command)
 
-Na raiz deste repositório (`src/c2s-webscraping-rails`):
+From the root of this repository (`src/c2s-webscraping-rails`):
 
 ```bash
 docker compose up -d
 ```
 
-O compose sobe:
+Compose starts:
 
 - 🧭 `webscraping-manager` (host `3000`)
 - 🔐 `auth-service` (host `3001`)
@@ -370,9 +297,9 @@ O compose sobe:
 - 🗄️ `postgres` (host `55432`, container `5432`)
 - 🧠 `redis` (host `6379`)
 
-## 🗄️ Preparar banco
+## 🗄️ Prepare the Database
 
-Após subir os containers, executar:
+After starting the containers, run:
 
 ```bash
 docker compose exec auth-service bundle exec rails db:prepare
@@ -380,22 +307,22 @@ docker compose exec notification-service bundle exec rails db:prepare
 docker compose exec webscraping-manager bundle exec rails db:prepare
 ```
 
-## 🩺 Health checks
+## 🩺 Health Checks
 
 ```bash
-curl http://localhost:3000/health 
+curl http://localhost:3000/health
 curl http://localhost:3001/health
 curl http://localhost:3002/health
 curl http://localhost:3003/health
 ```
 
-Resposta esperada:
+Expected response:
 
 ```json
 {"status":"ok"}
 ```
 
-## 🔌 Endpoints principais (MVP)
+## 🔌 Main Endpoints (MVP)
 
 ### auth-service
 
@@ -434,22 +361,22 @@ Resposta esperada:
 		</td>
 		<td align="center">
 			<a href="images/screenshot_221.png" target="_blank" rel="noopener noreferrer">
-				<img src="images/screenshot_221.png" alt="Tarefas" width="260" />
+				<img src="images/screenshot_221.png" alt="Tasks" width="260" />
 			</a>
 			<br />
-			<sub>Lista</sub>
+			<sub>List</sub>
 		</td>
 		<td align="center">
 			<a href="images/screenshot_222.png" target="_blank" rel="noopener noreferrer">
-				<img src="images/screenshot_222.png" alt="Detalhe" width="260" />
+				<img src="images/screenshot_222.png" alt="Details" width="260" />
 			</a>
 			<br />
-			<sub>Detalhe</sub>
+			<sub>Details</sub>
 		</td>
 	</tr>
 </table>
 
-### Páginas de erro (Web UI)
+### Error Pages (Web UI)
 
 
 - `🟢 GET /400.html`
@@ -469,78 +396,52 @@ Resposta esperada:
 - `🟢 GET /api/v1/notifications`
 - `🟢 GET /health`
 
-## 🔄 Fluxo funcional resumido
+## 🔄 Functional Flow Summary
 
-1. 👤 Usuário registra/login no `webscraping-manager` (via `auth-service`).
-2. 📝 Usuário cria tarefa de scraping.
-3. 🧭 `webscraping-manager` cria task `pending` e enfileira job.
-4. ⚙️ `webscraping-manager-sidekiq` chama `processing-service`.
-5. ✅ Task vai para `completed` (com `brand/model/price`) ou `failed` (com `error_message`).
-6. 🧱 Se houver bloqueio anti-bot/captcha, o worker aplica retry com backoff (até 3 tentativas) antes da falha final.
-7. 🔔 Evento `task_failed` só é publicado quando a falha é definitiva.
+1. 👤 The user registers/logs in to `webscraping-manager` (through `auth-service`).
+2. 📝 The user creates a scraping task.
+3. 🧭 `webscraping-manager` creates a `pending` task and enqueues a job.
+4. ⚙️ `webscraping-manager-sidekiq` calls `processing-service`.
+5. ✅ The task becomes `completed` (with `brand/model/price`) or `failed` (with `error_message`).
+6. 🧱 If an anti-bot/captcha block occurs, the worker retries with backoff (up to 3 attempts) before the final failure.
+7. 🔔 The `task_failed` event is published only when the failure is final.
 
-## 🗺️ Mapas visuais (rápida compreensão)
+## 🗺️ Visual Maps (Quick Overview)
 
 <details>
-	<summary><strong>🔁 Ciclo de vida da Task (status + retries)</strong></summary>
+	<summary><strong>🔁 Task Lifecycle (status + retries)</strong></summary>
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
 stateDiagram-v2
 	state "🟡 pending" as pending
 	state "🔵 processing" as processing
 	state "✅ completed" as completed
 	state "🔴 failed" as failed
 
-	[*] --> pending: 📨 enfileira job
+	[*] --> pending: 📨 enqueue job
 	pending --> processing: 🧠 dequeue (Sidekiq)
 
-	processing --> completed: 🕷️ scrape ok
+	processing --> completed: 🕷️ scrape succeeds
 	completed --> [*]: 🔔 task_completed
 
-	processing --> failed: 🕷️ scrape falha
-	failed --> pending: ⏱️ retry/backoff (até 3)\n🧱 anti-bot/captcha
-	failed --> [*]: 🔔 task_failed (definitivo)
+	processing --> failed: 🕷️ scrape fails
+	failed --> pending: ⏱️ retry/backoff (up to 3)\n🧱 anti-bot/captcha
+	failed --> [*]: 🔔 task_failed (final)
 
-	completed --> pending: 🔁 reprocess (UI/Web)
-	failed --> pending: 🔁 reprocess (UI/Web)
+	completed --> pending: 🔁 reprocess (Web UI)
+	failed --> pending: 🔁 reprocess (Web UI)
 ```
 
 </details>
 
 <details>
-	<summary><strong>🗄️ Modelo de dados (simplificado)</strong></summary>
+	<summary><strong>🗄️ Data Model (Simplified)</strong></summary>
 
 ```mermaid
-%%{init: {
-	'theme':'base',
-	'themeVariables': {
-		'primaryColor':'#E8F4FD',
-		'primaryBorderColor':'#4A90E2',
-		'primaryTextColor':'#2C3E50',
-		'secondaryColor':'#F0F8E8',
-		'tertiaryColor':'#FDF2E8',
-		'quaternaryColor':'#F8E8F8',
-		'lineColor':'#5D6D7E',
-		'fontFamily':'Inter,Segoe UI,Arial'
-	}
-}}%%
 erDiagram
 	direction LR
-	USER ||--o{ TASK : "🧭 cria 📝"
-	TASK ||--o{ NOTIFICATION : "🔔 gera 📣"
+	USER ||--o{ TASK : "🧭 creates 📝"
+	TASK ||--o{ NOTIFICATION : "🔔 generates 📣"
 
 	USER {
 		int id PK
@@ -561,11 +462,13 @@ erDiagram
 	}
 ```
 
+In the ER diagram, entity names remain without emoji because they are also schema identifiers, and Mermaid does not provide separate display labels.
+
 </details>
 
-## 🧪 Testes
+## 🧪 Tests
 
-Executar por serviço:
+Run the tests for each service:
 
 ```bash
 cd auth-service && bundle exec rspec && cd .. 
@@ -574,7 +477,7 @@ cd processing-service && bundle exec rspec && cd ..
 cd webscraping-manager && bundle exec rspec && cd ..
 ```
 
-Exemplo de foco no fluxo assíncrono do manager:
+Example focusing on the manager's asynchronous flow:
 
 ```bash
 cd webscraping-manager
