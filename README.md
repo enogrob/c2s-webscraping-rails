@@ -7,17 +7,18 @@ Ruby on Rails microservices ecosystem for managing vehicle-ad listing web scrapi
 ## 🏗️ Arquitetura
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"fontSize": "13px"}, "flowchart": {"wrappingWidth": 200, "minNodeWidth": 0}}}%%
 flowchart TD
 	subgraph ClientSide["👤 Client"]
 		CLI(["🖥️ Browser (Web UI)"])
 	end
 
 	subgraph CoreServices["⚙️ Rails Microservices"]
-		AUTH["🔐 auth-service"]
-		MANAGER["🧭 webscraping-manager"]
-		PROC["🕷️ processing-service"]
-		NOTIF["🔔 notification-service"]
-		SIDEKIQ["⚙️ webscraping-manager-sidekiq"]
+		AUTH(["🔐 auth-service"])
+		MANAGER(["🧭 webscraping-manager"])
+		PROC(["🕷️ processing-service"])
+		NOTIF(["🔔 notification-service"])
+		SIDEKIQ(["⚙️ webscraping-manager-sidekiq"])
 	end
 
 	subgraph Infra["🗄️ Infrastructure"]
@@ -26,7 +27,7 @@ flowchart TD
 	end
 
 	subgraph External["🌐 External Website"]
-		WEB["🌐 Webmotors"]
+		WEB(["🌐 Webmotors"])
 	end
 
 	CLI -->|"web pages + actions"| MANAGER
@@ -41,6 +42,19 @@ flowchart TD
 	SIDEKIQ -->|"publish event"| NOTIF
 	AUTH -->|"users"| PG
 	NOTIF -->|"notifications"| PG
+
+	classDef client fill:#D6EAF8,stroke:#496F91,color:#3E342C,stroke-width:2px;
+	classDef service fill:#E3D1F2,stroke:#8050A1,color:#3E342C,stroke-width:2px;
+	classDef datastore fill:#CDEEE4,stroke:#317C6B,color:#3E342C,stroke-width:2px;
+	classDef external fill:#FFDDBD,stroke:#9D5D27,color:#3E342C,stroke-width:2px;
+	class CLI client;
+	class AUTH,MANAGER,PROC,NOTIF,SIDEKIQ service;
+	class PG,REDIS datastore;
+	class WEB external;
+	style ClientSide fill:#F5F5F2,stroke:#B8BAB4,color:#3E342C
+	style CoreServices fill:#F5F5F2,stroke:#B8BAB4,color:#3E342C
+	style Infra fill:#F5F5F2,stroke:#B8BAB4,color:#3E342C
+	style External fill:#F5F5F2,stroke:#B8BAB4,color:#3E342C
 ```
 
 ## 🔁 Sequence Diagrams
@@ -413,10 +427,10 @@ Expected response:
 
 ```mermaid
 stateDiagram-v2
-	state "🟡 pending" as pending
-	state "🔵 processing" as processing
+	state "📥 pending" as pending
+	state "⚙️ processing" as processing
 	state "✅ completed" as completed
-	state "🔴 failed" as failed
+	state "❌ failed" as failed
 
 	[*] --> pending: 📨 enqueue job
 	pending --> processing: 🧠 dequeue (Sidekiq)
@@ -500,4 +514,3 @@ cd webscraping-manager && bundle exec rubocop && cd ..
 * [processing-service](https://github.com/enogrob/processing-service)
 * [notification-service](https://github.com/enogrob/notification-service)
 * [auth-service](https://github.com/enogrob/auth-service)
-
